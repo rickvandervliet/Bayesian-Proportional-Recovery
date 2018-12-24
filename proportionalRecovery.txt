@@ -1,0 +1,22 @@
+model{
+    for (nn in 1:NMeasurements){
+        y[nn] ~ dnorm(ym[nn],yp) # Model fit to data
+        ym[nn] <- alpha[id[nn]] + r[g[id[nn]]]*(66-alpha[id[nn]]) * (1-exp(-t[nn]/tau[g[id[nn]]])) # Model estimate
+    }
+    for (ss in 1:NSubjects) {
+        alpha[ss] <- alphaT[ss] * 66 # Patient specific intercept in range 0-66
+        logit(alphaT[ss]) <- alphaL[ss] # Patient specific intercept in range 0-1
+        alphaL[ss] ~ dnorm(alpham[g[ss]],alphap[g[ss]]) # Patient specific intercept in range -inf +inf
+        g[ss] ~ dcat(gp[]) # Group assignment for a patient
+    }
+    for (gg in 1:NGroups) {
+        rL[gg] ~ dnorm(0,1.0E-3) # Recovery coefficient for group g in range -inf +inf
+        logit(r[gg]) <- rL[gg] # Recovery coefficient for group g in range 0-1
+        tau[gg] <- tauShift[gg] + 1/7
+        tauShift[gg] ~ dgamma(1.0E-3,1.0E-3) # Time constant for group g
+        alpham[gg] ~ dnorm(0,1.0E-3) # Group initial distribution mean in logistic space
+        alphap[gg] ~ dgamma(1.0E-3,1.0E-3) # Group initial distribution precision in logistic space
+    }
+    gp[1:NGroups] ~ ddirch(gpalpha[1:NGroups]) # Group assignment probability
+    yp ~ dgamma(1.0E-3,1.0E-3) # Model precision
+}
