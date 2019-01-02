@@ -5,7 +5,7 @@ timePoints = 1:12;
 NPostSamples = 100;
 numFolds = size(FMt,2);
 numTime = numel(timePoints);
-%output = NaN(NPostSamples+1,size(FMt,2),numTime,6);
+output = NaN(NPostSamples+1,size(FMt,2),numTime,6);
 
 id = repmat(1:size(FMt,2),8,1);
 randInd = randperm(size(FMt,2));
@@ -14,55 +14,55 @@ ids = id(:,randInd);
 tts = tt(:,randInd);
 selectNonNan = ~isnan(FMts);
 
-% knnmdl = fitcknn([mod.rETI(:,1), mod.tauETI(:,1), mod.alphamETI(:,1), mod.alphapETI(:,1)],[1 2 2 3 3],'Standardize',1);
-% fits = struct('params', cell(1, numFolds));
-% 
-% for nn=1:numFolds
-%     set(1).subs = round((nn-1).*(size(FMts,2)./numFolds))+1: round(nn*size(FMts,2)./numFolds);
-%     set(2).subs = (1:size(FMts,2));
-%     set(2).subs(ismember(set(2).subs,set(1).subs)) = [];
-%     
-%     for k=1:2
-%         set(k).selectNonNan = selectNonNan(:,set(k).subs);
-%         set(k).FMt = FMts(:,set(k).subs);
-%         set(k).FMt = set(k).FMt(set(k).selectNonNan);
-%         set(k).tt = tts(:,set(k).subs);
-%         set(k).tt = set(k).tt(set(k).selectNonNan);
-%         set(k).id = id(:,set(k).subs);
-%         set(k).id = set(k).id(set(k).selectNonNan);
-%         set(k).id = changem(set(k).id,1:numel(unique(set(k).id)),unique(set(k).id));
-%         set(k).orgid = ids(1,set(k).subs);
-%         [~, set(k).uniqueidLast] = unique(set(k).id,'last');
-%         [~, set(k).uniqueidFirst] = unique(set(k).id,'first');
-%         set(k).FMfinal = set(k).FMt(set(k).uniqueidLast);
-%         set(k).ttfinal = set(k).tt(set(k).uniqueidLast);
-%         set(k).FMinitial = set(k).FMt(set(k).uniqueidFirst);
-%         set(k).ttinitial = set(k).tt(set(k).uniqueidFirst);
-%     end;
-% 
-%     fits(nn).params = fitBugs(set(2).FMt,set(2).tt,set(2).id,NPostSamples,knnmdl,mod);
-%     
-%     for t=1:numTime
-%         time = timePoints(t);
-%         selectEarly = set(1).tt<time.*7;
-%         FMtsub = set(1).FMt(selectEarly);
-%         ttsub = set(1).tt(selectEarly);
-%         idsub = set(1).id(selectEarly);
-%         ttinitialsub = set(1).ttinitial(unique(idsub));
-%         ttfinalsub = set(1).ttfinal(unique(idsub));
-%         FMinitialsub = set(1).FMinitial(unique(idsub));
-%         FMfinalsub = set(1).FMfinal(unique(idsub));
-%         idsub = changem(idsub,1:numel(unique(idsub)),unique(idsub));
-%         orgidsub = set(1).orgid(unique(idsub));
-%         
-%         for rr=1:NPostSamples+1
-%             if ~isempty(FMtsub)
-%                 outputTemp = predictionBugs(FMtsub,ttsub,idsub,ttfinalsub,ttinitialsub,FMfinalsub,FMinitialsub,fits(nn).params(rr));
-%                 output(rr,orgidsub,t,:) = permute(outputTemp,[4,2,3,1]);
-%             end;
-%         end;
-%     end;
-% end;
+knnmdl = fitcknn([mod.rETI(:,1), mod.tauETI(:,1), mod.alphamETI(:,1), mod.alphapETI(:,1)],[1 2 2 3 3],'Standardize',1);
+fits = struct('params', cell(1, numFolds));
+
+for nn=1:numFolds
+    set(1).subs = round((nn-1).*(size(FMts,2)./numFolds))+1: round(nn*size(FMts,2)./numFolds);
+    set(2).subs = (1:size(FMts,2));
+    set(2).subs(ismember(set(2).subs,set(1).subs)) = [];
+    
+    for k=1:2
+        set(k).selectNonNan = selectNonNan(:,set(k).subs);
+        set(k).FMt = FMts(:,set(k).subs);
+        set(k).FMt = set(k).FMt(set(k).selectNonNan);
+        set(k).tt = tts(:,set(k).subs);
+        set(k).tt = set(k).tt(set(k).selectNonNan);
+        set(k).id = id(:,set(k).subs);
+        set(k).id = set(k).id(set(k).selectNonNan);
+        set(k).id = changem(set(k).id,1:numel(unique(set(k).id)),unique(set(k).id));
+        set(k).orgid = ids(1,set(k).subs);
+        [~, set(k).uniqueidLast] = unique(set(k).id,'last');
+        [~, set(k).uniqueidFirst] = unique(set(k).id,'first');
+        set(k).FMfinal = set(k).FMt(set(k).uniqueidLast);
+        set(k).ttfinal = set(k).tt(set(k).uniqueidLast);
+        set(k).FMinitial = set(k).FMt(set(k).uniqueidFirst);
+        set(k).ttinitial = set(k).tt(set(k).uniqueidFirst);
+    end;
+
+    fits(nn).params = fitBugs(set(2).FMt,set(2).tt,set(2).id,NPostSamples,knnmdl,mod);
+    
+    for t=1:numTime
+        time = timePoints(t);
+        selectEarly = set(1).tt<time.*7;
+        FMtsub = set(1).FMt(selectEarly);
+        ttsub = set(1).tt(selectEarly);
+        idsub = set(1).id(selectEarly);
+        ttinitialsub = set(1).ttinitial(unique(idsub));
+        ttfinalsub = set(1).ttfinal(unique(idsub));
+        FMinitialsub = set(1).FMinitial(unique(idsub));
+        FMfinalsub = set(1).FMfinal(unique(idsub));
+        idsub = changem(idsub,1:numel(unique(idsub)),unique(idsub));
+        orgidsub = set(1).orgid(unique(idsub));
+        
+        for rr=1:NPostSamples+1
+            if ~isempty(FMtsub)
+                outputTemp = predictionBugs(FMtsub,ttsub,idsub,ttfinalsub,ttinitialsub,FMfinalsub,FMinitialsub,fits(nn).params(rr));
+                output(rr,orgidsub,t,:) = permute(outputTemp,[4,2,3,1]);
+            end;
+        end;
+    end;
+end;
 
 FMtnn = FMt(~isnan(FMt));
 idnn = id(~isnan(FMt));
