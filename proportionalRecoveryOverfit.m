@@ -53,5 +53,5 @@ init0, ...                          % Initial values for latent variables
 'verbosity' , 0 , ...               % 0=do not produce any output; 1=minimal text output; 2=maximum text output
 'cleanup' , 1);                    % clean up of temporary files?
 save(['Output/NumberOfGroupsIs' int2str(numGroups) '.mat'], 'samples', 'stats', 'structArray')
-processProportionalRecoveryModel(samples,dem)
+processProportionalRecoveryModel(samples)
 clear samples stats structArray init0 dataStruct S
