@@ -2,12 +2,17 @@ function output = determineETI(samples, alpha)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
-samples = samples(~isnan(samples));
-output = NaN(3,1);
+if isrow(samples)
+    samples = samples';
+end;    
+output = NaN(size(samples,2),3);
 
-if ~isempty(samples)
-    sortedSamples = sort(samples);
-    interval(1) = sortedSamples(max([1 round(numel(samples)*alpha/2)]));
-    interval(2) = sortedSamples(round(numel(samples)*(1-alpha/2)));
-    output = [mean(samples) interval];
+for ii=1:size(samples,2)
+    sampleset = samples(~isnan(samples(:,ii)),ii);
+
+    if ~isempty(sampleset)
+        interval(1) = prctile(sampleset,100*(alpha/2));
+        interval(2) = prctile(sampleset,100*(1-alpha/2));
+        output(ii,:) = [mean(sampleset) interval];
+    end;
 end;    
