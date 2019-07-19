@@ -10,6 +10,11 @@ model{
         g[ss] ~ dcat(gp[]) # Group assignment for a patient
         yinitialpred[ss] <- alpha[ss] + r[g[ss]]*(66-alpha[ss]) * (1-exp(-ttinitial[ss]/tau[g[ss]])) # Initial FMA-UE
         yfinalpred[ss] <- alpha[ss] + r[g[ss]]*(66-alpha[ss]) * (1-exp(-ttfinal[ss]/tau[g[ss]])) # Endpoint FMA-UE
+
+        NIHSS[ss] ~ dgamma(NIHSSa[g[ss]],NIHSSb[g[ss]])
+        bamford[ss] ~ dcat(bamfordp[g[ss],])
+        sa[ss] ~ dbin(sap[g[ss]],1)
+        fe[ss] ~ dbin(fep[g[ss]],1)
     }
     ydiffpred <- yfinalpred-yinitialpred
 }
