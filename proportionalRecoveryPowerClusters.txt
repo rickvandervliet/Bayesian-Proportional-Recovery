@@ -1,0 +1,28 @@
+model{
+        for (nn in 1:NMeasurements){
+            y[nn] ~ dnorm(ym[nn],yp) # Model fit to data
+            ym[nn] <- alpha[id[nn]] + (r[g[id[nn]]]*(66-alpha[id[nn]])) * (1-exp(-tNoise[nn]/tau[g[id[nn]]]))+ stEff[id[nn]]* (1-exp(-max(tNoise[nn]-tStartNoise[id[nn]],0)/tau[g[id[nn]]])) # Model estimate
+            tNoise[nn] <- t[nn] + measNoise[nn]*simMeasNoise
+            measNoise[nn] ~ dunif(-1,1)
+        }
+        for (ss in 1:NSubjects) {
+            alpha[ss] <- alphaT[ss] * 66 # Patient specific intercept in range 0-66
+            logit(alphaT[ss]) <- alphaL[ss] # Patient specific intercept in range 0-1
+            alphaL[ss] ~ dnorm(alpham[g[ss]],alphap[g[ss]]) # Patient specific intercept in range -inf +inf
+            g[ss] ~ dcat(gp[]) # Group assignment for a patient
+            c[ss] <- clust[g[ss]]
+            stEff[ss] <- trEff[c[ss]]*trGr[ss] + plEff
+            tStartNoise[ss] <- tStart[ss] + treatNoise[ss]*simTreatNoise
+            treatNoise[ss] ~ dunif(-1,1)
+        }
+        
+        for (cc in 1:NClusters){
+            trEff[cc] ~ dnorm(0,10E-2)T(-22,22)
+            p[cc] <- (trEff[cc] > 0)
+        }
+        plEff ~ dnorm(0,10E-2)T(-22,22)
+        gagr <- (sum(g == gorg))/NSubjects
+        cagr <- (sum(c == corg))/NSubjects
+        yp ~ dgamma(10E-3,10E-3)
+        ys <- pow(yp,-0.5)
+}
