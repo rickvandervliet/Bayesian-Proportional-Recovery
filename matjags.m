@@ -377,8 +377,11 @@ for i=1:Nparam
     newfval = [ '"' newfval '"' ];
     
     if ((sfield1 == 1) && (sfield2 == 1))  % if the field is a singleton
-        fprintf(fid, '%s <-\n%G',newfval, val);
-        
+        if(isnan(val))
+            fprintf(fid, '%s <-NA',newfval);
+        else
+            fprintf(fid, '%s <-\n%G',newfval, val);
+        end
         %
         % One-D array:
         %   beta = c(6, 6, ...)
