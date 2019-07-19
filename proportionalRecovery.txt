@@ -16,6 +16,7 @@ model{
         tauShift[gg] ~ dgamma(1.0E-3,1.0E-3) # Time constant for group g
         alpham[gg] ~ dnorm(0,1.0E-3) # Group initial distribution mean in logistic space
         alphap[gg] ~ dgamma(1.0E-3,1.0E-3) # Group initial distribution precision in logistic space
+
     }
     gp[1:NGroups] ~ ddirch(gpalpha[1:NGroups]) # Group assignment probability
     yp ~ dgamma(1.0E-3,1.0E-3) # Model precision
