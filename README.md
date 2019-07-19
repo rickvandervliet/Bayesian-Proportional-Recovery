@@ -28,4 +28,15 @@ but n-1 patients. This model is then applied to sequential data of the remaining
 ################################################################################################################
 2. How to improve the study power of upper limb recovery and rehabilitation trials early post stroke?
 In the second paper, we amended the model of the first paper with an extra term for an intervention effect.
+This way, the model can be used to analyse stroke recovery and rehabilitation trials.
 
+The following files were used for the analysis in this paper:
+
+1. generateBugs.m and proportionalRecoveryGeneration.txt
+To create simulated datasets based on the model parameters derived in the first paper.
+
+2. powerBugs.m and proportionalRecoveryPower.txt 
+To estimate the intervention effect from a simulated study
+
+3. proportionalRecoveryPower.m
+Master script to generate data and estimate intervention effects for different study designs.
