@@ -1,24 +1,23 @@
 load('Data/CombinedTransform.mat')
 load('Output/ResultsNumberOfGroupsIs10.mat')
-load('Output/clusterEstimate.mat')
 
 timePoints = 1:12;
-NPostSamples = 10;
-numFolds = size(dem(2).FMt,2);
+NPostSamples = 100;
+numFolds = size(dem(1).FMt,2);
 numTime = numel(timePoints);
-output = NaN(NPostSamples+1,size(dem(2).FMt,2),numTime,6);
+output = NaN(NPostSamples+1,size(dem(1).FMt,2),numTime,6);
  
-id = repmat(1:size(dem(2).FMt,2),8,1);
-randInd = randperm(size(dem(2).FMt,2));
-FMts = dem(2).FMt(:,randInd);
+id = repmat(1:size(dem(1).FMt,2),8,1);
+randInd = randperm(size(dem(1).FMt,2));
+FMts = dem(1).FMt(:,randInd);
 ids = id(:,randInd);
-tts = dem(2).tt(:,randInd)./7;
+tts = dem(1).tt(:,randInd)./7;
 selectNonNan = ~isnan(FMts);
-
+clusterEstimate = mod.clustETI;
 knnmdl = fitcknn([mod.rETI(:,1), mod.tauETI(:,1), mod.alphamETI(:,1), mod.alphapETI(:,1)],[1 2 2 3 3],'Standardize',1);
 fits = struct('params', cell(1, numFolds));
 
-for nn=73:numFolds
+for nn=1:numFolds
     fprintf('Num=%i \n',nn)
     set(1).subs = round((nn-1).*(size(FMts,2)./numFolds))+1: round(nn*size(FMts,2)./numFolds);
     set(2).subs = (1:size(FMts,2));
@@ -40,13 +39,9 @@ for nn=73:numFolds
         set(k).ttfinal = set(k).tt(set(k).uniqueidLast);
         set(k).FMinitial = set(k).FMt(set(k).uniqueidFirst);
         set(k).ttinitial = set(k).tt(set(k).uniqueidFirst);
-        set(k).NIHSS = dem(2).NIHSS(set(k).orgid)+1;
-        set(k).bamford = dem(2).bamford(set(k).orgid);
-        set(k).sa = dem(2).SA(set(k).orgid);
-        set(k).fe = dem(2).FE(set(k).orgid);
     end;
 
-    fits(nn).params = fitBugs(set(2),NPostSamples,knnmdl,mod);
+    tic; fits(nn).params = fitBugs(set(2),NPostSamples,knnmdl,mod); toc;
     
     for t=1:numTime
         time = timePoints(t);
@@ -58,11 +53,6 @@ for nn=73:numFolds
         set(1).ttfinalsub = set(1).ttfinal(unique(set(1).idsub));
         set(1).FMinitialsub = set(1).FMinitial(unique(set(1).idsub));
         set(1).FMfinalsub = set(1).FMfinal(unique(set(1).idsub));
-        set(1).NIHSSsub = set(1).NIHSS(unique(set(1).idsub));
-        set(1).bamfordsub = set(1).bamford(unique(set(1).idsub));
-        set(1).sasub = set(1).sa(unique(set(1).idsub));
-        set(1).fesub = set(1).fe(unique(set(1).idsub));
-        
         set(1).idsub = changem(set(1).idsub,1:numel(unique(set(1).idsub)),unique(set(1).idsub));
         set(1).orgidsub = set(1).orgid(unique(set(1).idsub));
         
@@ -77,8 +67,8 @@ for nn=73:numFolds
     end;
 end;
 
-FMtnn = dem(2).FMt(~isnan(dem(2).FMt));
-idnn = id(~isnan(dem(2).FMt));
+FMtnn = dem(1).FMt(~isnan(dem(1).FMt));
+idnn = id(~isnan(dem(1).FMt));
 [~, uniqueidLast] = unique(idnn,'last');
 [~, uniqueidFirst] = unique(idnn,'first');
 FMinitial = FMtnn(uniqueidFirst);
@@ -116,4 +106,4 @@ for tt=1:numTime
     end;
 end;
 
-save('Output/CrossValidationNumberOfGroupsIs10Init.mat','output','timePoints','fits','results')
+save('Output/CrossValidationNumberOfGroupsIs10.mat','output','timePoints','fits','results')
