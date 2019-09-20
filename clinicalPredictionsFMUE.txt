@@ -1,0 +1,13 @@
+model{
+    for (nn in 1:NMeasurements){
+        FMUE[nn] <- max(min(y[nn],66),0)
+        y[nn] ~ dnorm(ym[nn],yp) # Model fit to data
+        ym[nn] <- alpha + r[g]*(66-alpha) * (1-exp(-t[nn]/tau[g])) # Model estimate
+    }
+    alpha <- alphaT * 66 # Patient specific intercept in range 0-66
+    logit(alphaT) <- alphaL # Patient specific intercept in range 0-1
+    alphaL ~ dnorm(alpham[g],alphap[g]) # Patient specific intercept in range -inf +inf
+    g ~ dcat(gp[]) # Group assignment for a patient
+    yp ~ dgamma(1.0E-3,1.0E-3) # Model precision
+
+}
