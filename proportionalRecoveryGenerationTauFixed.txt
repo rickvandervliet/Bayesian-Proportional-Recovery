@@ -1,0 +1,20 @@
+model{
+    for (nn in 1:NMeasurements){
+        ym[nn] ~ dnorm(ymm[nn],yp) # Model fit to data
+        y[nn] <- max(min(ym[nn],66),0)
+        ymm[nn] <- alpha[id[nn]] + (r[g[id[nn]]]*(66-alpha[id[nn]])) * (1-exp(-tNoise[nn]/tau[g[id[nn]]])) + (trGr[id[nn]]*trEff)*(1-exp(-max(tNoise[nn]-tStartNoise[id[nn]],0)/tauFixed)) # Model estimate
+        tNoise[nn] <- t[nn] + measNoise[nn]*simMeasNoise
+        measNoise[nn] ~ dunif(-1,1)
+    }
+    for (ss in 1:NSubjects) {
+        alpha[ss] <- alphaT[ss] * 66 # Patient specific intercept in range 0-66
+        logit(alphaT[ss]) <- alphaL[ss] # Patient specific intercept in range 0-1
+        alphaL[ss] ~ dnorm(alpham[g[ss]],alphap[g[ss]])T(,fmLim) # Patient specific intercept in range -inf +1.4
+        g[ss] ~ dcat(gp[]) # Group assignment for a patient
+        tStartNoise[ss] <- tStart[ss] + treatNoise[ss]*simTreatNoise
+        treatNoise[ss] ~ dunif(-1,1)
+    }
+    #rrI <-1
+    #rI ~ dunif(1,NPostSamp)
+    #rrI <- round(rI)
+}
