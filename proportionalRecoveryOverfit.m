@@ -1,4 +1,4 @@
-load('Data/SimCombinedTransform.mat')
+load('Data/CombinedTransform.mat')
 
 id = repmat(1:size(dem(1).FMt,2),8,1);
 selectNonNan = ~isnan(dem(1).FMt);
@@ -9,9 +9,9 @@ NSubjects = numel(unique(id));
 NMeasurements = numel(FMt);
 NChains = 10;
 doparallel = 1;
-NBurnin  = 10^3; 
-NSamples  = 10^3;
-gpalpha = 1.6;
+NBurnin  = 2.5*10^4; 
+NSamples  = 5*10^4;
+gpalpha = 1.8;
 
 %% Overfitted model
 numGroups = 10;
@@ -22,7 +22,6 @@ dataStruct = struct('y', FMt, ...
     'NGroups', numGroups,...
     't', tt./7,...
     'gpalpha', gpalpha*ones(numGroups,1),...
-    'bamfordalpha', ones(3,1),...
     'id',id);
 
 init0(1:NChains) = struct('alphaL', cell(1, 1),'rL', cell(1, 1),'gp', cell(1, 1),...
@@ -53,7 +52,6 @@ init0, ...                          % Initial values for latent variables
 'savejagsoutput' , 1 , ...          % Save command line output produced by JAGS?
 'verbosity' , 2 , ...               % 0=do not produce any output; 1=minimal text output; 2=maximum text output
 'cleanup' , 1);                    % clean up of temporary files?
-%save(['Output/NumberOfGroupsIs' int2str(numGroups) '.mat'], 'samples', 'stats', 'structArray')
 
 numClasses = NaN(NChains,1);
 pClasses = NaN(NChains,1);
@@ -74,5 +72,6 @@ samples.r = samples.r(selectInd,:,:);
 samples.alpham = samples.alpham(selectInd,:,:);
 samples.alphap = samples.alphap(selectInd,:,:);
 
-%proportionalRecoveryProcess(samples,dem(1))
+save(['Output/NumberOfGroupsIs' int2str(numGroups) '.mat'], 'samples', 'stats')
+proportionalRecoveryProcess(samples,dem(1),0.05,['Output/ResultsNumberOfGroupsIs' int2str(numGroups) '.mat'])
 clear samples stats structArray init0 dataStruct S
