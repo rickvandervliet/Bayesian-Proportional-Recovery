@@ -2,10 +2,6 @@ function params = fitBugs(set,NPostSamples,knnmdl,mod)
     FMt = set.FMt;
     tt = set.tt;
     id = set.id;
-    NIHSS = set.NIHSS;
-    bamford = set.bamford;
-    sa = set.sa;
-    fe = set.fe;
     
     NSubjects = id(end);
     NMeasurements = numel(FMt);
@@ -66,15 +62,6 @@ function params = fitBugs(set,NPostSamples,knnmdl,mod)
     params(1).alpham = stats.mean.alpham;
     params(1).alphap = stats.mean.alphap;
     params(1).clust = predict(knnmdl,[params(1).r', params(1).tau', params(1).alpham', params(1).alphap']);
-    g = median(squeeze(samples.g(1,:,:)));
-    for gg=1:numGroups
-        NIHSSgamma = fitdist(NIHSS(g==gg)','gamma');
-        params(1).NIHSSgamma.a(gg) = NIHSSgamma.a;
-        params(1).NIHSSgamma.b(gg) = 1./NIHSSgamma.b;
-        params(1).bamfordp(gg,:) = [mean(bamford(g==gg)==1),mean(bamford(g==gg)==2),mean(bamford(g==gg)==3)];
-        params(1).fep(gg) = mean(fe(g==gg));
-        params(1).sap(gg) = mean(sa(g==gg));
-    end;  
         
     for ii=1:NPostSamples
         params(ii+1).yp = samples.yp(1,randInd(ii));
@@ -83,15 +70,6 @@ function params = fitBugs(set,NPostSamples,knnmdl,mod)
         params(ii+1).r = samples.r(1,randInd(ii),:);
         params(ii+1).alpham = samples.alpham(1,randInd(ii),:);
         params(ii+1).alphap = samples.alphap(1,randInd(ii),:);
-        g = squeeze(samples.g(1,randInd(ii),:));
-        for gg=1:numGroups
-            NIHSSgamma = fitdist(NIHSS(g==gg)','gamma');
-            params(ii+1).NIHSSgamma.a(gg) = NIHSSgamma.a;
-            params(ii+1).NIHSSgamma.b(gg) = 1./NIHSSgamma.b;
-            params(ii+1).bamfordp(gg,:) = [mean(bamford(g==gg)==1),mean(bamford(g==gg)==2),mean(bamford(g==gg)==3)];
-            params(ii+1).fep(gg) = mean(fe(g==gg));
-            params(ii+1).sap(gg) = mean(sa(g==gg));
-        end;    
         params(ii+1).clust = params(1).clust;
     end;
     
