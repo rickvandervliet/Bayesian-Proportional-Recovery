@@ -1,6 +1,5 @@
-function proportionalRecoveryProcess(samples,dem,cutoff)
+function proportionalRecoveryProcess(samples,dem,cutoff,fileName)
 
-orgNumGroups = size(samples.r,3);
 gp = squeeze(samples.gp);
 grInc = find(mean(gp)>=cutoff);
 r = squeeze(samples.r(:,:,grInc));
@@ -18,7 +17,8 @@ alphap = squeeze(samples.alphap(:,:,grInc));
 alphas = 1./sqrt(alphap);
 alpha = squeeze(samples.alpha);
 g = squeeze(samples.g);
-g = changem(g,1:5,grInc);
+g = changem(g,1:numel(grInc),grInc);
+    
 numSubs = size(squeeze(samples.alpha),2);
 
 mod.numGroups = numel(grInc);
@@ -31,6 +31,28 @@ mod.alphasETI = NaN(mod.numGroups,3);
 mod.gpETI = NaN(mod.numGroups,3);
 mod.alphaETI = NaN(numSubs,3);
 mod.gETI = mode(g);
+
+if isfield(samples,'agem')
+    %NIHSSm = squeeze(samples.NIHSSm(:,:,grInc));
+    %NIHSSp = squeeze(samples.NIHSSp(:,:,grInc));
+    agem = squeeze(samples.agem(:,:,grInc));
+    agep = squeeze(samples.agep(:,:,grInc));
+    genderp = squeeze(samples.genderp(:,:,grInc));
+    rtpap = squeeze(samples.rtpap(:,:,grInc));
+    bamfordp = squeeze(samples.bamfordp(:,:,grInc,:));
+    %motricitym = squeeze(samples.motricitym(:,:,grInc));
+    %motricityp = squeeze(samples.motricityp(:,:,grInc));
+    
+    %mod.NIHSSm = NaN(numSubs,3);
+    %mod.NIHSSp = NaN(numSubs,3);
+    mod.agem = NaN(numSubs,3);
+    mod.agep = NaN(numSubs,3);
+    mod.genderp = NaN(numSubs,3);
+    mod.rtpap = NaN(numSubs,3);
+    mod.bamfordp = NaN(numSubs,3,3);
+    %mod.motricitym = NaN(numSubs,3);
+    %mod.motricityp = NaN(numSubs,3);
+end
 
 for ii=1:numSubs
     mod.alphaETI(ii,:) = determineETI(alpha(:,ii),0.05);
@@ -68,6 +90,20 @@ for ii=1:mod.numGroups
     mod.alphapETI(ii,:) = determineETI(alphap(:,ii),0.05);
     mod.alphasETI(ii,:) = determineETI(alphas(:,ii),0.05);
     mod.gpETI(ii,:) = determineETI(gp(:,ii),0.05);
+    
+    if isfield(samples,'agem')
+        %mod.NIHSSmETI(ii,:) = determineETI(NIHSSm(:,ii),0.05);
+        %mod.NIHSSpETI(ii,:) = determineETI(NIHSSp(:,ii),0.05);
+        mod.agemETI(ii,:) = determineETI(agem(:,ii),0.05);
+        mod.agepETI(ii,:) = determineETI(agep(:,ii),0.05);
+        mod.genderpETI(ii,:) = determineETI(genderp(:,ii),0.05);
+        mod.rtpapETI(ii,:) = determineETI(rtpap(:,ii),0.05);
+        for kk=1:3
+            mod.bamfordpETI(ii,kk,:) = determineETI(bamfordp(:,ii,kk),0.05);
+        end
+        %mod.motricitymETI(ii,:) = determineETI(motricitym(:,ii),0.05);
+        %mod.motricitypETI(ii,:) = determineETI(motricityp(:,ii),0.05);
+    end
     sub.numSub(ii,:) = determineETI(sum(g==ii,2),0.05);
     sub.age(ii,:) = determineETI(age(g==ii),0.05);
     rtpa = repmat(dem.rtpa,size(g,1),1);
@@ -95,4 +131,9 @@ if mod.numGroups==5
     mod.clustETI = mode(changem(g,mod.clust,1:5));
 end;    
 
-save(['Output/ResultsNumberOfGroupsIs' int2str(orgNumGroups) '.mat'], 'mod','sub')
+if mod.numGroups==6
+    mod.clust = [1 1 2 2 3 3];
+    mod.clustETI = mode(changem(g,mod.clust,1:6));
+end;  
+
+save(fileName, 'mod','sub')
